@@ -4,47 +4,27 @@ namespace LabManager.Database;
 
 class DatabaseSetup
 {
-    private DatabaseConfig databaseConfig;
+    private DatabaseConfig databaseConfig; 
 
     public DatabaseSetup(DatabaseConfig databaseConfig)
     {
-        this.databaseConfig = databaseConfig;
-        CreateTableComputer();
-        CreateTableLab();
+        this.databaseConfig=databaseConfig;
+        CreateComputerTable();
     }
-
-    private void CreateTableComputer()
+    public void CreateComputerTable()
     {
         var connection = new SqliteConnection(databaseConfig.ConnectionString);
         connection.Open();
-
         var command = connection.CreateCommand();
         command.CommandText = @"
             CREATE TABLE IF NOT EXISTS Computers(
-                id int not null primary key,
+                id int not null primary key, 
                 ram varchar(100) not null,
-                processor varchar(100) not null
+                processador varchar(100) not null
             );
         ";
         command.ExecuteNonQuery();
-        connection.Close();
-    }
 
-    private void CreateTableLab()
-    {
-        var connection = new SqliteConnection("Data Source=database.db");
-        connection.Open();
-
-        var command = connection.CreateCommand();
-        command.CommandText = @"
-            CREATE TABLE IF NOT EXISTS Labs(
-                id int not null primary key,
-                number varchar(100) not null,
-                name varchar(100) not null,
-                block varchar(100) not null
-            );
-        ";
-        command.ExecuteNonQuery();
         connection.Close();
     }
 }
