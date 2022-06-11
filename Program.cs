@@ -1,13 +1,13 @@
-using LabManager.Database;
-using LabManager.Models;
-using LabManager.Repositories;
 using Microsoft.Data.Sqlite;
+using LabManager.Database;
+using LabManager.Repositories;
+using LabManager.Models;
 
 var databaseConfig = new DatabaseConfig();
-var DatabaseSetup= new DatabaseSetup(databaseConfig);
+var databaseSetup = new DatabaseSetup(databaseConfig);
 var computerRepository = new ComputerRepository(databaseConfig);
 
-// Roteamento
+//Roteamento
 var modelName = args[0];
 var modelAction = args[1];
 
@@ -18,66 +18,61 @@ if(modelName == "Computer")
         Console.WriteLine("Computer List");
         foreach (var computer in computerRepository.GetAll())
         {
-            Console.WriteLine("{0}, {1}, {2}", computer.Id, computer.Ram, computer.Processador);
+            Console.WriteLine("{0}, {1}, {2}", computer.Id, computer.Ram, computer.Processor);
         }
     }
 
     if(modelAction == "New")
     {
-        var connection = new SqliteConnection("Data Source=database.db");
-        connection.Open(); 
-
-        Console.WriteLine("New computer");
         int id = Convert.ToInt32(args[2]);
-        string ram = args[3];
-        string processador = args[4];
-
-        var computer = new Computer(id,ram,processador);
+        var ram = args[3];
+        var processor = args[4];
+        var connection = new SqliteConnection("Data Source=database.db");
+        var computer = new Computer(id, ram, processor);
         computerRepository.Save(computer);
     }
-    
+
     if(modelAction == "Show")
     {
-        int id = Convert.ToInt32(args[2]);
-        if (computerRepository.existsById(id))
+        var id = Convert.ToInt32(args[2]);
+
+        if(computerRepository.existsById(id))
         {
             var computer = computerRepository.GetById(id);
-            Console.WriteLine("{0}, {1}, {2}", computer.Id, computer.Ram, computer.Processador);
-        } 
-        else
-        {
-            Console.WriteLine($"Computer com id {id} não existe");
-        }
-    }
+            Console.WriteLine("{0}, {1}, {2}", computer.Id, computer.Ram, computer.Processor);
 
-    if(modelAction == "Delete")
-    {
-       int id = Convert.ToInt32(args[2]);
-       computerRepository.Delete(id);
+        } else 
+        {
+            Console.WriteLine($"O computador ${id} não existe");
+        }
     }
 
     if(modelAction == "Update")
     {
-        int id = Convert.ToInt32(args[2]);
+        var id = Convert.ToInt32(args[2]);
         string ram = args[3];
-        string processador = args[4];
+        string processor = args[4];
+        var computer = new Computer(id, ram, processor);
+        computerRepository.Update(computer);
+    }
 
-        var computer = new Computer(id, ram, processador);
-        computerRepository.Update(computer);   
+    if(modelAction == "Delete")
+    {
+        var id = Convert.ToInt32(args[2]);
+        computerRepository.Delete(id);
     }
 }
-
 else if(modelName == "Lab")
 {
     if(modelAction == "List")
     {
         Console.WriteLine("Lab List");
-        
         var connection = new SqliteConnection("Data Source=database.db");
         connection.Open();
+
         var command = connection.CreateCommand();
-        
         command.CommandText = "SELECT * FROM Labs;";
+
         var reader = command.ExecuteReader();
 
         while(reader.Read())
@@ -87,18 +82,18 @@ else if(modelName == "Lab")
         reader.Close();
         connection.Close();
     }
+    
 
     if(modelAction == "New")
     {
-        var id = Convert.ToInt32(args[2]);
+        int id = Convert.ToInt32(args[2]);
         var number = args[3];
         var name = args[4];
         var block = args[5];
         var connection = new SqliteConnection("Data Source=database.db");
-        
         connection.Open();
+
         var command = connection.CreateCommand();
-        
         command.CommandText = "INSERT INTO Labs VALUES($id, $number, $name, $block);";
         command.Parameters.AddWithValue("$id", id);
         command.Parameters.AddWithValue("$number", number);
