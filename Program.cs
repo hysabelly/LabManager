@@ -1,111 +1,100 @@
-﻿using Microsoft.Data.Sqlite;
 using LabManager.Database;
-using LabManager.Repositories;
 using LabManager.Models;
+using LabManager.Repositories;
+using Microsoft.Data.Sqlite;
+
+
 
 var databaseConfig = new DatabaseConfig();
-new DatabaseSetup(databaseConfig);
+var DatabaseSetup= new DatabaseSetup(databaseConfig);
 
-//Routing
+var computerRepository = new ComputerRepository(databaseConfig);
+
+// Roteamento
 var modelName = args[0];
 var modelAction = args[1];
 
 if(modelName == "Computer")
 {
-    var computerRepository = new ComputerRepository(databaseConfig);
-
     if(modelAction == "List")
     {
         Console.WriteLine("Computer List");
         foreach (var computer in computerRepository.GetAll())
         {
-            Console.WriteLine("{0}, {1}, {2}", computer.Id, computer.Ram, computer.Processor);
+            Console.WriteLine("{0}, {1}, {2}", computer.Id, computer.Ram, computer.Processador);
         }
     }
 
     if(modelAction == "New")
     {
-        Console.WriteLine("Computer New");
-        int id = Convert.ToInt32(args[2]);
-        var ram = args[3];
-        var processor = args[4];
+        var connection = new SqliteConnection("Data Source=database.db");
+        connection.Open(); 
 
-        var computer = new Computer(id, ram, processor);
+        Console.WriteLine("New computer");
+        int id = Convert.ToInt32(args[2]);
+        string ram = args[3];
+        string processador = args[4];
+
+        var computer = new Computer(id,ram,processador);
         computerRepository.Save(computer);
     }
-
+    
     if(modelAction == "Show")
     {
-        Console.WriteLine("Computer Show");
         int id = Convert.ToInt32(args[2]);
-    
-        foreach (var computer in computerRepository.GetAll())
+        if (computerRepository.existsById(id))
         {
-            if(computer.Id == id)
-            {
-            computerRepository.GetById(id);
-            Console.WriteLine("{0}, {1}, {2}", computer.Id, computer.Ram, computer.Processor);
-            }
+            var computer = computerRepository.GetById(id);
+            Console.WriteLine("{0}, {1}, {2}", computer.Id, computer.Ram, computer.Processador);
+        } 
+        else
+        {
+            Console.WriteLine($"Computer com id {id} não existe");
         }
+       
     }
 
-     if(modelAction == "Update")
+    if(modelAction == "Delete")
     {
-        Console.WriteLine("Computer Update");
-        int id = Convert.ToInt32(args[2]);
-        var ram = args[3];
-        var processor = args[4];
-
-        var computer = new Computer(id, ram, processor);
-        computerRepository.Update(computer);
+       int id = Convert.ToInt32(args[2]);
+       computerRepository.Delete(id);
     }
 
-     if(modelAction == "Delete")
+    if(modelAction == "Update")
     {
-        Console.WriteLine("Computer Delete");
         int id = Convert.ToInt32(args[2]);
-        computerRepository.Delete(id);
+        string ram = args[3];
+        string processador = args[4];
+
+        var computer = new Computer(id, ram, processador);
+        computerRepository.Update(computer);   
     }
 }
 
-else if(modelName == "Lab")
+if(modelName == "Lab")
 {
     if(modelAction == "List")
     {
-        Console.WriteLine("Lab List");
-        var connection = new SqliteConnection("Data Source=database.db");
-        connection.Open();
-
-        var command = connection.CreateCommand();
-        command.CommandText = "SELECT * FROM Labs;";
-
-        var reader = command.ExecuteReader();
-
-        while(reader.Read())
-        {
-            Console.WriteLine("{0}, {1}, {2}, {3}", reader.GetInt32(0), reader.GetString(1), reader.GetString(2), reader.GetString(3));
-        }
-
-        reader.Close();
-        connection.Close();
+        
     }
 
     if(modelAction == "New")
     {
-        int id = Convert.ToInt32(args[2]);
-        var number = args[3];
-        var name = args[4];
-        var block = args[5];
-
         var connection = new SqliteConnection("Data Source=database.db");
         connection.Open();
 
+        Console.WriteLine("New lab");
+        int id = Convert.ToInt32(args[2]);
+        string num = args[3];
+        string nome = args[4];
+        string bloco = args[5];
+         
         var command = connection.CreateCommand();
-        command.CommandText = "INSERT INTO Labs VALUES($id, $number, $name, $block);";
+        command.CommandText = "INSERT INTO Lab VALUES($id, $num,  $nome, $bloco);";
         command.Parameters.AddWithValue("$id", id);
-        command.Parameters.AddWithValue("$number", number);
-        command.Parameters.AddWithValue("$name", name);
-        command.Parameters.AddWithValue("$block", block);
+        command.Parameters.AddWithValue("$num", num);
+        command.Parameters.AddWithValue("$nome", nome);
+        command.Parameters.AddWithValue("$bloco", bloco);
 
         command.ExecuteNonQuery();
         connection.Close();
