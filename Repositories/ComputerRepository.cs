@@ -47,9 +47,27 @@ class ComputerRepository
         command.ExecuteNonQuery();
         
         connection.Close();
+        reader.Close();
         return computer;
     }
 
+    public Computer Save(Computer computer) 
+    {
+        var connection = new SqliteConnection(databaseConfig.ConnectionString);
+        connection.Open();
+
+        var command = connection.CreateCommand();
+        command.CommandText = "INSERT INTO Computers VALUES($id, $ram, $processor);";
+        command.Parameters.AddWithValue("$id", computer.Id);
+        command.Parameters.AddWithValue("$ram", computer.Ram);
+        command.Parameters.AddWithValue("$processor", computer.Processor);
+
+        command.ExecuteNonQuery();
+        connection.Close();
+
+        return computer;
+    }
+    
     public Computer GetById(int id)
     {
         var connection = new SqliteConnection(databaseConfig.ConnectionString);
@@ -102,10 +120,17 @@ class ComputerRepository
 
     public bool existsById (int id)
     {
-        
+ 
+        var connection = new SqliteConnection(databaseConfig.ConnectionString);
+        connection.Open();
 
-        //var reader = command.ExecuteScalar();
-        return false;
+        var command = connection.CreateCommand();
+        command.CommandText = "SELECT count(id) FROM Computers WHERE id=$id;";
+        command.Parameters.AddWithValue("$id", id);
+
+        bool result = Convert.ToBoolean(command.ExecuteScalar());
+
+        return result; 
     }
     private Computer readerToComputer(SqliteDataReader reader)
     {
