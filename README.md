@@ -1,3 +1,3 @@
 # LabManager
 
-´´´dotnet add package Microsoft.Data.Sqlite´´´
+```dotnet add package Microsoft.Data.Sqlite```
