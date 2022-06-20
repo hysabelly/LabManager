@@ -47,26 +47,43 @@ if(modelName == "Computer")
         }
     }
 
-    if(modelAction == "Update")
+     if(modelAction == "Update")
     {
         var id = Convert.ToInt32(args[2]);
+         
         string ram = args[3];
         string processor = args[4];
-        var computer = new Computer(id, ram, processor);
-        computerRepository.Update(computer);
+
+        if(computerRepository.existsById(id))
+        {
+           var computer = new Computer(id, ram, processor);
+           computerRepository.Update(computer); 
+        } else 
+        {
+            Console.WriteLine($"O computador {id} não existe.");
+        } 
     }
 
     if(modelAction == "Delete")
     {
         var id = Convert.ToInt32(args[2]);
-        computerRepository.Delete(id);
+        
+        if(computerRepository.existsById(id))
+        {
+            computerRepository.Delete(id);
+        } else 
+        {
+            Console.WriteLine($"O computador {id} não existe.");
+        }
     }
 }
+
 else if(modelName == "Lab")
 {
     if(modelAction == "List")
     {
         Console.WriteLine("Lab List");
+        
         var connection = new SqliteConnection("Data Source=database.db");
         connection.Open();
 
@@ -74,7 +91,6 @@ else if(modelName == "Lab")
         command.CommandText = "SELECT * FROM Labs;";
 
         var reader = command.ExecuteReader();
-
         while(reader.Read())
         {
             Console.WriteLine("{0}, {1}, {2}, {3}", reader.GetInt32(0), reader.GetString(1), reader.GetString(2), reader.GetString(3));
@@ -82,18 +98,19 @@ else if(modelName == "Lab")
         reader.Close();
         connection.Close();
     }
-    
 
     if(modelAction == "New")
     {
         int id = Convert.ToInt32(args[2]);
+        
         var number = args[3];
         var name = args[4];
         var block = args[5];
         var connection = new SqliteConnection("Data Source=database.db");
+        
         connection.Open();
-
         var command = connection.CreateCommand();
+        
         command.CommandText = "INSERT INTO Labs VALUES($id, $number, $name, $block);";
         command.Parameters.AddWithValue("$id", id);
         command.Parameters.AddWithValue("$number", number);
